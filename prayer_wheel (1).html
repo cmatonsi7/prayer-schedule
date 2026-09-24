@@ -1,0 +1,911 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CEYC ROWSA Prayer Wheel</title>
+<meta name="theme-color" content="#07111e">
+<style>
+  :root {
+    --bg-1: #030712;
+    --bg-2: #08182c;
+    --panel: rgba(10, 23, 42, 0.84);
+    --panel-2: rgba(255,255,255,0.045);
+    --stroke: rgba(255,255,255,0.11);
+    --text: #f7fbff;
+    --muted: #9eb2c6;
+    --gold: #f5c45f;
+    --gold-2: #ffe6ae;
+    --cyan: #42d9ff;
+    --cyan-2: #8cecff;
+    --shadow: 0 30px 70px rgba(0,0,0,.34);
+    --radius: 28px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    color: var(--text);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background:
+      radial-gradient(circle at 10% 10%, rgba(66,217,255,.14), transparent 28rem),
+      radial-gradient(circle at 90% 18%, rgba(245,196,95,.14), transparent 24rem),
+      linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 50%, #04111e 100%);
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+    background-size: 34px 34px;
+    opacity: .16;
+    mask-image: radial-gradient(circle at center, black 35%, transparent 90%);
+  }
+  .wrap {
+    width: min(1240px, calc(100vw - 28px));
+    margin: 0 auto;
+    padding: 28px 0 40px;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 10px;
+    padding: 7px 12px;
+    border: 1px solid rgba(66,217,255,.18);
+    border-radius: 999px;
+    background: rgba(66,217,255,.08);
+    color: var(--cyan-2);
+    font-size: .74rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .14em;
+  }
+  h1 {
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(2.1rem, 5vw, 4.5rem);
+    line-height: .97;
+    font-weight: 500;
+    letter-spacing: -.03em;
+  }
+  .sub {
+    max-width: 760px;
+    margin: 12px 0 0;
+    color: var(--muted);
+    font-size: .98rem;
+    line-height: 1.62;
+  }
+  .header-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+  }
+  .clock-box {
+    flex: 0 0 auto;
+    min-width: 250px;
+    text-align: right;
+    padding: 18px 20px;
+    border-radius: 22px;
+    border: 1px solid var(--stroke);
+    background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.028));
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow);
+  }
+  .clock-box strong {
+    display: block;
+    font-size: clamp(1.5rem, 2.6vw, 2.2rem);
+    font-variant-numeric: tabular-nums;
+  }
+  .clock-box span {
+    color: var(--muted);
+    font-size: .82rem;
+  }
+  .meet-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(245,196,95,.35);
+    background: rgba(245,196,95,.1);
+    color: var(--gold-2);
+    font-size: .82rem;
+    font-weight: 800;
+    text-decoration: none;
+    transition: transform .18s ease, background .18s ease;
+  }
+  .meet-link:hover {
+    transform: translateY(-1px);
+    background: rgba(245,196,95,.18);
+  }
+  .meet-link::before {
+    content: "🎥";
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(310px, .75fr);
+    gap: 18px;
+    align-items: stretch;
+  }
+  .card {
+    border: 1px solid var(--stroke);
+    border-radius: var(--radius);
+    background: linear-gradient(180deg, rgba(12,24,43,.82), rgba(8,18,34,.82));
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(12px);
+  }
+  .wheel-card {
+    padding: 20px;
+  }
+  .wheel-frame {
+    position: relative;
+    width: min(100%, 760px);
+    aspect-ratio: 8 / 9.4;
+    margin: 0 auto;
+    display: grid;
+    place-items: center;
+  }
+  svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    overflow: visible;
+  }
+  .legend {
+    position: absolute;
+    left: 50%;
+    top: 52.5%;
+    transform: translate(-50%, -50%);
+    width: min(290px, 44%);
+    padding: 22px 18px;
+    border-radius: 999px;
+    text-align: center;
+    background: radial-gradient(circle at 50% 10%, rgba(66,217,255,.08), rgba(10,20,35,.92) 58%);
+    border: 1px solid rgba(255,255,255,.1);
+    box-shadow:
+      inset 0 0 40px rgba(255,255,255,.03),
+      0 0 0 10px rgba(255,255,255,.025),
+      0 18px 45px rgba(0,0,0,.35);
+  }
+  .legend .kicker {
+    color: var(--cyan-2);
+    font-size: .72rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .18em;
+  }
+  .legend h2 {
+    margin: 10px 0 6px;
+    font-size: clamp(1.05rem, 2.1vw, 1.45rem);
+    line-height: 1.15;
+  }
+  .legend .leader {
+    color: #d8e5ef;
+    font-size: .9rem;
+    line-height: 1.45;
+    min-height: 2.7em;
+  }
+  .legend .slot {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(245,196,95,.12);
+    border: 1px solid rgba(245,196,95,.18);
+    color: var(--gold-2);
+    font-size: .84rem;
+    font-weight: 800;
+  }
+  .legend .helper {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: .76rem;
+    line-height: 1.45;
+  }
+
+  .segment {
+    cursor: pointer;
+    transition: transform .2s ease, filter .2s ease, opacity .2s ease;
+    transform-origin: 400px 400px;
+    opacity: .95;
+    outline: none;
+  }
+  .segment:hover, .segment:focus-visible {
+    transform: scale(1.018);
+    filter: brightness(1.08);
+  }
+  .segment.active {
+    filter:
+      drop-shadow(0 0 8px rgba(66,217,255,.9))
+      drop-shadow(0 0 18px rgba(245,196,95,.46))
+      brightness(1.16);
+    animation: pulse 2.2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+  }
+  .label {
+    pointer-events: none;
+    fill: rgba(255,255,255,.98);
+    font-size: 11px;
+    font-weight: 800;
+    paint-order: stroke;
+    stroke: rgba(0,0,0,.42);
+    stroke-width: 3px;
+    stroke-linejoin: round;
+  }
+  .tick {
+    stroke: rgba(255,255,255,.13);
+    stroke-width: 1.15;
+  }
+  .ring-outline {
+    fill: none;
+    stroke: rgba(255,255,255,.08);
+    stroke-width: 1.3;
+  }
+  .day-badge {
+    pointer-events: none;
+    fill: rgba(255,255,255,.9);
+    font-size: 11.5px;
+    font-weight: 900;
+    letter-spacing: .14em;
+  }
+
+  .side {
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .status {
+    padding: 18px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, rgba(66,217,255,.12), rgba(245,196,95,.08));
+    border: 1px solid rgba(66,217,255,.16);
+  }
+  .status .small {
+    color: var(--cyan-2);
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .16em;
+    font-weight: 900;
+  }
+  .status h3 {
+    margin: 8px 0 3px;
+    font-size: 1.48rem;
+    line-height: 1.15;
+  }
+  .status p {
+    margin: 6px 0 0;
+    color: var(--muted);
+    line-height: 1.52;
+    font-size: .92rem;
+  }
+  .progress {
+    height: 8px;
+    margin-top: 14px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(255,255,255,.09);
+  }
+  .progress > i {
+    display: block;
+    width: 0%;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--cyan), var(--gold));
+    transition: width .5s linear;
+  }
+  .next-card {
+    padding: 16px;
+    border-radius: 20px;
+    border: 1px solid var(--stroke);
+    background: rgba(255,255,255,.03);
+  }
+  .next-card .small {
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    font-size: .68rem;
+    font-weight: 900;
+  }
+  .next-card strong {
+    display: block;
+    margin-top: 6px;
+    font-size: 1rem;
+    line-height: 1.35;
+  }
+  .next-card span {
+    display: block;
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: .84rem;
+    line-height: 1.45;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 10px;
+  }
+  .stat {
+    padding: 15px 14px;
+    border-radius: 18px;
+    border: 1px solid var(--stroke);
+    background: rgba(255,255,255,.03);
+  }
+  .stat b {
+    display: block;
+    font-size: 1.1rem;
+  }
+  .stat span {
+    color: var(--muted);
+    font-size: .78rem;
+  }
+  .note {
+    padding: 16px;
+    border-radius: 18px;
+    border: 1px dashed rgba(255,255,255,.14);
+    background: rgba(255,255,255,.02);
+    color: var(--muted);
+    font-size: .82rem;
+    line-height: 1.55;
+  }
+
+  .list-card {
+    margin-top: 18px;
+    padding: 22px;
+  }
+  .list-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .list-head h3 {
+    margin: 0;
+    font-size: 1.28rem;
+  }
+  .list-head p {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: .85rem;
+  }
+  .list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 10px;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 88px minmax(0,1fr);
+    gap: 12px;
+    align-items: center;
+    padding: 13px 14px;
+    border-radius: 18px;
+    border: 1px solid var(--stroke);
+    background: rgba(255,255,255,.025);
+    cursor: pointer;
+    transition: transform .18s ease, background .18s ease, border-color .18s ease;
+  }
+  .row:hover {
+    transform: translateY(-1px);
+    background: rgba(255,255,255,.05);
+  }
+  .row.active {
+    background: rgba(66,217,255,.085);
+    border-color: rgba(66,217,255,.35);
+    box-shadow: inset 4px 0 0 rgba(66,217,255,.9);
+  }
+  .slot-no {
+    display: inline-grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+    border: 1px solid rgba(255,255,255,.09);
+    font-weight: 900;
+    color: var(--gold-2);
+  }
+  .row strong {
+    display: block;
+    line-height: 1.2;
+    font-size: .94rem;
+  }
+  .row span {
+    display: block;
+    color: var(--muted);
+    font-size: .77rem;
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+  .tooltip {
+    position: fixed;
+    z-index: 30;
+    max-width: min(320px, calc(100vw - 22px));
+    padding: 14px 16px;
+    border-radius: 16px;
+    color: white;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(6,14,27,.96);
+    box-shadow: 0 20px 50px rgba(0,0,0,.36);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(6px);
+    transition: opacity .15s ease, transform .15s ease;
+  }
+  .tooltip.show { opacity: 1; transform: translateY(0); }
+  .tooltip b {
+    display: block;
+    margin-bottom: 4px;
+  }
+  .tooltip small {
+    display: block;
+    color: var(--gold-2);
+    margin-bottom: 5px;
+    font-size: .78rem;
+  }
+  .tooltip span {
+    color: var(--muted);
+    font-size: .83rem;
+    line-height: 1.45;
+  }
+  footer {
+    text-align: center;
+    color: #7b93a5;
+    margin-top: 18px;
+    font-size: .74rem;
+  }
+
+  @media (max-width: 980px) {
+    header {
+      align-items: stretch;
+      flex-direction: column;
+    }
+    .header-actions {
+      align-items: flex-start;
+    }
+    .clock-box {
+      text-align: left;
+      min-width: 0;
+    }
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 720px) {
+    .wrap {
+      width: min(100vw - 16px, 1240px);
+      padding-top: 18px;
+    }
+    .wheel-card, .side, .list-card {
+      padding: 16px;
+      border-radius: 22px;
+    }
+    .legend {
+      width: min(300px, 50%);
+      padding: 18px 12px;
+    }
+    .label {
+      font-size: 9px;
+    }
+    .list {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+      scroll-behavior: auto !important;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <div class="eyebrow">CEYC ROWSA · Friday Night Prayer Chain</div>
+        <h1>CEYC Prayer Chain</h1>
+        <p class="sub">
+          The prayer wheel begins <strong>Friday at 9:00 PM</strong> and moves in 30-minute slots through the night until <strong>Saturday 7:00 AM</strong>. Hover or tap any segment to see the cell name, leader, and prayer time.
+        </p>
+      </div>
+      <div class="header-actions">
+        <div class="clock-box">
+          <strong id="liveClock">--:--:--</strong>
+          <span id="liveDate">Local time</span>
+        </div>
+        <a class="meet-link" href="https://meet.jit.si/ceyc-leaders-meeting" target="_blank" rel="noopener noreferrer">Join Leaders Meeting</a>
+      </div>
+    </header>
+
+    <section class="grid">
+      <div class="card wheel-card">
+        <div class="wheel-frame">
+          <svg id="wheel" viewBox="0 -60 800 920" aria-label="Prayer wheel schedule"></svg>
+          <div class="legend">
+            <div class="kicker" id="legendKicker">Praying now</div>
+            <h2 id="legendCell">Loading…</h2>
+            <div class="leader" id="legendLeader">Please wait…</div>
+            <div class="slot" id="legendTime">--</div>
+            <div class="helper" id="legendHelper">Live highlighting follows the weekly Friday 9 PM prayer chain.</div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="card side">
+        <div class="status">
+          <div class="small">Live status</div>
+          <h3 id="currentCell">Loading…</h3>
+          <p id="currentLeader">Please wait…</p>
+          <p id="currentTime">--</p>
+          <div class="progress" aria-label="Current slot progress"><i id="progressBar"></i></div>
+        </div>
+
+        <div class="next-card">
+          <div class="small">Next slot</div>
+          <strong id="nextCell">—</strong>
+          <span id="nextLeader">—</span>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><b>20</b><span>Prayer cells</span></div>
+          <div class="stat"><b>30 min</b><span>Per slot</span></div>
+          <div class="stat"><b>Fri 9 PM</b><span>Schedule starts</span></div>
+          <div class="stat"><b>Sat 7 AM</b><span>Schedule ends</span></div>
+        </div>
+
+        <div class="note">
+          <strong style="display:block;color:#eaf4fb;margin-bottom:6px">How it works</strong>
+          This wheel is aligned to a <strong>weekly</strong> cycle. It highlights a segment only when the current local time falls between Friday 9:00 PM and Saturday 7:00 AM. At other times, it shows the next upcoming start.
+        </div>
+      </aside>
+    </section>
+
+    <section class="card list-card">
+      <div class="list-head">
+        <div>
+          <h3>Prayer schedule</h3>
+          <p>Click any item to focus the matching wheel segment.</p>
+        </div>
+      </div>
+      <div class="list" id="scheduleList"></div>
+    </section>
+
+    <footer>CEYC ROWSA · Standalone HTML for GitHub Pages</footer>
+  </div>
+
+  <div id="tooltip" class="tooltip" role="tooltip"></div>
+
+<script>
+const cells = [{"leader": "Sibongile Portia Makaya", "cell": "Rise Student Living Cell", "slotIndex": 1, "startAbsolute": 0, "endAbsolute": 30, "time": "Fri 9:00 PM–9:30 PM"}, {"leader": "Tendayi Kunaka", "cell": "ETF", "slotIndex": 2, "startAbsolute": 30, "endAbsolute": 60, "time": "Fri 9:30 PM–10:00 PM"}, {"leader": "Micheal Musamba", "cell": "The Beloved of God", "slotIndex": 3, "startAbsolute": 60, "endAbsolute": 90, "time": "Fri 10:00 PM–10:30 PM"}, {"leader": "Dr. Ian Mbano", "cell": "Young Professionals Cell", "slotIndex": 4, "startAbsolute": 90, "endAbsolute": 120, "time": "Fri 10:30 PM–11:00 PM"}, {"leader": "Tawa Makudo", "cell": "Grace Abound", "slotIndex": 5, "startAbsolute": 120, "endAbsolute": 150, "time": "Fri 11:00 PM–11:30 PM"}, {"leader": "Asanda Pezisa and Thabang Mofokeng", "cell": "Grace Upon Grace", "slotIndex": 6, "startAbsolute": 150, "endAbsolute": 180, "time": "Fri 11:30 PM–Sat 12:00 AM"}, {"leader": "Angel Siringwani", "cell": "The Unlimited Cell", "slotIndex": 7, "startAbsolute": 180, "endAbsolute": 210, "time": "Sat 12:00 AM–12:30 AM"}, {"leader": "Khomotso Lebopa", "cell": "Christ in us", "slotIndex": 8, "startAbsolute": 210, "endAbsolute": 240, "time": "Sat 12:30 AM–1:00 AM"}, {"leader": "Joseph Bernard Msukwa", "cell": "Light of Glory", "slotIndex": 9, "startAbsolute": 240, "endAbsolute": 270, "time": "Sat 1:00 AM–1:30 AM"}, {"leader": "Hlubi Mvinjelwa", "cell": "Flourish Cell", "slotIndex": 10, "startAbsolute": 270, "endAbsolute": 300, "time": "Sat 1:30 AM–2:00 AM"}, {"leader": "Meinhold Speelman and Akim Chikunguwo", "cell": "Piomen", "slotIndex": 11, "startAbsolute": 300, "endAbsolute": 330, "time": "Sat 2:00 AM–2:30 AM"}, {"leader": "Doreen Apollo", "cell": "MPWRD Code Rabah", "slotIndex": 12, "startAbsolute": 330, "endAbsolute": 360, "time": "Sat 2:30 AM–3:00 AM"}, {"leader": "Mihlali Madikane", "cell": "Excellent Youth Cell", "slotIndex": 13, "startAbsolute": 360, "endAbsolute": 390, "time": "Sat 3:00 AM–3:30 AM"}, {"leader": "Kundai Chamunorwa", "cell": "The Living Stones", "slotIndex": 14, "startAbsolute": 390, "endAbsolute": 420, "time": "Sat 3:30 AM–4:00 AM"}, {"leader": "Mbasa", "cell": "Missionary Kings", "slotIndex": 15, "startAbsolute": 420, "endAbsolute": 450, "time": "Sat 4:00 AM–4:30 AM"}, {"leader": "Mbali Mazoko and Piousness", "cell": "Blazing Inferno", "slotIndex": 16, "startAbsolute": 450, "endAbsolute": 480, "time": "Sat 4:30 AM–5:00 AM"}, {"leader": "Liberty Manyaya", "cell": "CEYC Fishoek", "slotIndex": 17, "startAbsolute": 480, "endAbsolute": 510, "time": "Sat 5:00 AM–5:30 AM"}, {"leader": "Tawanda Gutu", "cell": "CEYC Milnerton", "slotIndex": 18, "startAbsolute": 510, "endAbsolute": 540, "time": "Sat 5:30 AM–6:00 AM"}, {"leader": "Prosper", "cell": "Khayelitsha Fellowship", "slotIndex": 19, "startAbsolute": 540, "endAbsolute": 570, "time": "Sat 6:00 AM–6:30 AM"}, {"leader": "Afikile Magcakini", "cell": "Angels Cell", "slotIndex": 20, "startAbsolute": 570, "endAbsolute": 600, "time": "Sat 6:30 AM–7:00 AM"}];
+const START_DAY = 5; // Friday
+const START_MINUTES = 21 * 60; // 9 PM
+const SLOT_MINUTES = 30;
+const CYCLE_MINUTES = cells.length * SLOT_MINUTES;
+const END_DAY = 6; // Saturday
+const wheel = document.getElementById('wheel');
+const tooltip = document.getElementById('tooltip');
+const scheduleList = document.getElementById('scheduleList');
+
+const colors = [
+  '#163b73','#1a4f88','#21639b','#2977a7','#2e8bad',
+  '#339ea8','#38b0a0','#45bd95','#5dc881','#7acf6d',
+  '#9fd15d','#bfd05a','#d8c55f','#e7b96b','#efa078',
+  '#ec8a87','#df7895','#c46fa1','#9a69ab','#6e66b0'
+];
+
+function polar(cx, cy, radius, angle) {
+  const rad = (angle - 90) * Math.PI / 180;
+  return { x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad) };
+}
+
+function arcPath(cx, cy, outerR, innerR, startAngle, endAngle) {
+  const p1 = polar(cx, cy, outerR, startAngle);
+  const p2 = polar(cx, cy, outerR, endAngle);
+  const p3 = polar(cx, cy, innerR, endAngle);
+  const p4 = polar(cx, cy, innerR, startAngle);
+  const largeArc = endAngle - startAngle > 180 ? 1 : 0;
+  return [
+    `M ${p1.x} ${p1.y}`,
+    `A ${outerR} ${outerR} 0 ${largeArc} 1 ${p2.x} ${p2.y}`,
+    `L ${p3.x} ${p3.y}`,
+    `A ${innerR} ${innerR} 0 ${largeArc} 0 ${p4.x} ${p4.y}`,
+    'Z'
+  ].join(' ');
+}
+
+function splitLabel(text) {
+  const words = text.split(/\s+/);
+  if (words.length === 1) return [text];
+  if (text.length <= 16) return [text];
+  const lines = [];
+  let current = '';
+  words.forEach(word => {
+    const trial = current ? current + ' ' + word : word;
+    if (trial.length > 14 && current) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = trial;
+    }
+  });
+  if (current) lines.push(current);
+  return lines.slice(0, 2);
+}
+
+function showTooltip(item, x, y) {
+  tooltip.innerHTML = `
+    <small>Slot ${item.slotIndex}</small>
+    <b>${item.cell}</b>
+    <span>${item.leader}<br>${item.time}</span>
+  `;
+  const pad = 12;
+  const rectWidth = Math.min(320, window.innerWidth - pad * 2);
+  let left = Math.min(x + 14, window.innerWidth - rectWidth - pad);
+  left = Math.max(pad, left);
+  let top = Math.min(y + 14, window.innerHeight - 120);
+  top = Math.max(pad, top);
+  tooltip.style.left = left + 'px';
+  tooltip.style.top = top + 'px';
+  tooltip.classList.add('show');
+}
+
+function hideTooltip() {
+  tooltip.classList.remove('show');
+}
+
+function createWheel() {
+  const NS = 'http://www.w3.org/2000/svg';
+  const group = document.createElementNS(NS, 'g');
+  group.setAttribute('id', 'segmentsGroup');
+
+  // decorative ring
+  const outerRing = document.createElementNS(NS, 'circle');
+  outerRing.setAttribute('cx', '400');
+  outerRing.setAttribute('cy', '400');
+  outerRing.setAttribute('r', '344');
+  outerRing.setAttribute('class', 'ring-outline');
+  wheel.appendChild(outerRing);
+
+  const innerRing = document.createElementNS(NS, 'circle');
+  innerRing.setAttribute('cx', '400');
+  innerRing.setAttribute('cy', '400');
+  innerRing.setAttribute('r', '198');
+  innerRing.setAttribute('class', 'ring-outline');
+  wheel.appendChild(innerRing);
+
+  const step = 360 / cells.length;
+  cells.forEach((item, i) => {
+    const start = i * step;
+    const end = start + step;
+    const path = document.createElementNS(NS, 'path');
+    path.setAttribute('d', arcPath(400, 400, 338, 205, start + .8, end - .8));
+    path.setAttribute('fill', colors[i % colors.length]);
+    path.setAttribute('class', 'segment');
+    path.dataset.index = i;
+    path.setAttribute('tabindex', '0');
+    path.setAttribute('aria-label', `${item.cell}. Leader: ${item.leader}. Time: ${item.time}`);
+
+    path.addEventListener('mousemove', (e) => showTooltip(item, e.clientX, e.clientY));
+    path.addEventListener('mouseleave', hideTooltip);
+    path.addEventListener('focus', () => {
+      const r = path.getBoundingClientRect();
+      showTooltip(item, r.left + r.width / 2, r.top + r.height / 2);
+    });
+    path.addEventListener('blur', hideTooltip);
+    path.addEventListener('click', (e) => {
+      showTooltip(item, e.clientX, e.clientY);
+      setFocused(item.slotIndex - 1);
+      document.querySelector(`.row[data-index="${i}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    group.appendChild(path);
+
+    const angle = start + step / 2;
+    const labelPos = polar(400, 400, 272, angle);
+    const text = document.createElementNS(NS, 'text');
+    text.setAttribute('x', labelPos.x);
+    text.setAttribute('y', labelPos.y);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('dominant-baseline', 'middle');
+    text.setAttribute('class', 'label');
+    text.setAttribute('transform', `rotate(${angle > 90 && angle < 270 ? angle + 180 : angle} ${labelPos.x} ${labelPos.y})`);
+
+    splitLabel(item.cell).forEach((line, idx, arr) => {
+      const tspan = document.createElementNS(NS, 'tspan');
+      tspan.setAttribute('x', labelPos.x);
+      tspan.setAttribute('dy', idx === 0 ? (arr.length > 1 ? '-.48em' : '0') : '1.05em');
+      tspan.textContent = line;
+      text.appendChild(tspan);
+    });
+    group.appendChild(text);
+
+    const tickStart = polar(400, 400, 194, start);
+    const tickEnd = polar(400, 400, 346, start);
+    const tick = document.createElementNS(NS, 'line');
+    tick.setAttribute('x1', tickStart.x);
+    tick.setAttribute('y1', tickStart.y);
+    tick.setAttribute('x2', tickEnd.x);
+    tick.setAttribute('y2', tickEnd.y);
+    tick.setAttribute('class', 'tick');
+    wheel.appendChild(tick);
+  });
+  wheel.appendChild(group);
+
+  // day markers — pulled further away from the ring so they don't crowd it
+  const fri = document.createElementNS(NS, 'text');
+  fri.setAttribute('x', '400');
+  fri.setAttribute('y', '0');
+  fri.setAttribute('text-anchor', 'middle');
+  fri.setAttribute('class', 'day-badge');
+  fri.textContent = 'FRIDAY · 9 PM START';
+  wheel.appendChild(fri);
+
+  const sat = document.createElementNS(NS, 'text');
+  sat.setAttribute('x', '400');
+  sat.setAttribute('y', '794');
+  sat.setAttribute('text-anchor', 'middle');
+  sat.setAttribute('class', 'day-badge');
+  sat.textContent = 'SATURDAY · 7 AM END';
+  wheel.appendChild(sat);
+}
+
+function createList() {
+  scheduleList.innerHTML = '';
+  cells.forEach((item, i) => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.dataset.index = i;
+    row.innerHTML = `
+      <div class="slot-no">${String(item.slotIndex).padStart(2, '0')}</div>
+      <div>
+        <strong>${item.cell}</strong>
+        <span>${item.leader}<br>${item.time}</span>
+      </div>
+    `;
+    row.addEventListener('click', () => {
+      const seg = document.querySelector(`.segment[data-index="${i}"]`);
+      if (seg) {
+        const r = seg.getBoundingClientRect();
+        showTooltip(item, r.left + r.width / 2, r.top + r.height / 2);
+        seg.focus();
+      }
+      setFocused(i);
+    });
+    scheduleList.appendChild(row);
+  });
+}
+
+function minutesSinceWeekStart(date) {
+  const day = date.getDay(); // 0=Sun ... 6=Sat
+  return day * 1440 + date.getHours() * 60 + date.getMinutes() + date.getSeconds() / 60;
+}
+
+const weeklyStart = START_DAY * 1440 + START_MINUTES;
+const weeklyEnd = weeklyStart + CYCLE_MINUTES;
+
+function formatNextStart(now) {
+  const day = now.getDay();
+  const nowMin = day * 1440 + now.getHours() * 60 + now.getMinutes();
+  const diff = weeklyStart - nowMin;
+  if (diff > 0) {
+    return 'This Friday at 9:00 PM';
+  }
+  return 'Next Friday at 9:00 PM';
+}
+
+let manualFocusIndex = null;
+
+function setFocused(index) {
+  manualFocusIndex = index;
+  updateLegend(cells[index], false);
+}
+
+function clearFocus() {
+  manualFocusIndex = null;
+}
+
+function updateLegend(item, isLive, helperOverride) {
+  document.getElementById('legendKicker').textContent = isLive ? 'Praying now' : 'Selected slot';
+  document.getElementById('legendCell').textContent = item.cell;
+  document.getElementById('legendLeader').textContent = item.leader;
+  document.getElementById('legendTime').textContent = item.time;
+  document.getElementById('legendHelper').textContent = helperOverride || 'Live highlighting follows the weekly Friday 9 PM prayer chain.';
+}
+
+function update() {
+  const now = new Date();
+  document.getElementById('liveClock').textContent = now.toLocaleTimeString([], {
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  });
+  document.getElementById('liveDate').textContent = now.toLocaleDateString(undefined, {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+
+  const weekMinute = minutesSinceWeekStart(now);
+  const inPrayerWindow = weekMinute >= weeklyStart && weekMinute < weeklyEnd;
+
+  document.querySelectorAll('.segment').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.row').forEach(el => el.classList.remove('active'));
+
+  if (inPrayerWindow) {
+    const elapsed = weekMinute - weeklyStart;
+    const index = Math.floor(elapsed / SLOT_MINUTES);
+    const slotProgress = (elapsed % SLOT_MINUTES) / SLOT_MINUTES * 100;
+    const item = cells[index];
+    const next = cells[index + 1] || null;
+
+    document.getElementById('currentCell').textContent = item.cell;
+    document.getElementById('currentLeader').textContent = item.leader;
+    document.getElementById('currentTime').textContent = item.time;
+    document.getElementById('progressBar').style.width = slotProgress.toFixed(2) + '%';
+
+    if (next) {
+      document.getElementById('nextCell').textContent = next.cell;
+      document.getElementById('nextLeader').textContent = `${next.leader} · ${next.time}`;
+    } else {
+      document.getElementById('nextCell').textContent = 'Prayer chain ends at Saturday 7:00 AM';
+      document.getElementById('nextLeader').textContent = 'The next cycle begins next Friday at 9:00 PM.';
+    }
+
+    document.querySelector(`.segment[data-index="${index}"]`)?.classList.add('active');
+    document.querySelector(`.row[data-index="${index}"]`)?.classList.add('active');
+
+    if (manualFocusIndex === null) {
+      updateLegend(item, true);
+    }
+  } else {
+    document.getElementById('progressBar').style.width = '0%';
+    document.getElementById('currentCell').textContent = 'Prayer chain currently inactive';
+    document.getElementById('currentLeader').textContent = 'This schedule runs weekly from Friday 9:00 PM to Saturday 7:00 AM.';
+    document.getElementById('currentTime').textContent = formatNextStart(now);
+
+    document.getElementById('nextCell').textContent = cells[0].cell;
+    document.getElementById('nextLeader').textContent = `${cells[0].leader} · ${cells[0].time}`;
+
+    if (manualFocusIndex === null) {
+      document.getElementById('legendKicker').textContent = 'Next start';
+      document.getElementById('legendCell').textContent = 'Friday 9:00 PM';
+      document.getElementById('legendLeader').textContent = 'The prayer chain begins with the first assigned cell.';
+      document.getElementById('legendTime').textContent = cells[0].time;
+      document.getElementById('legendHelper').textContent = 'Outside the prayer window, explore any segment to preview its slot.';
+    }
+  }
+}
+
+createWheel();
+createList();
+update();
+setInterval(update, 1000);
+
+document.addEventListener('click', (e) => {
+  const insideInteractive = e.target.closest('.segment, .row, .tooltip');
+  if (!insideInteractive) {
+    clearFocus();
+    hideTooltip();
+    update();
+  }
+});
+window.addEventListener('resize', () => {
+  if (!tooltip.classList.contains('show')) return;
+});
+</script>
+</body>
+</html>
